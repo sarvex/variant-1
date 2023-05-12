@@ -16,9 +16,8 @@ for std_flag in std_flags.split() if std_flags is not None else ['']:
   os.environ['CXXFLAGS'] = std_flag
   for exceptions in ['OFF', 'ON']:
     for build_type in ['Debug', 'Release']:
-      config = '{}-{}-{}'.format(
-          filter(str.isalnum, std_flag), exceptions, build_type)
-      build_dir = 'build-{}'.format(config)
+      config = f'{filter(str.isalnum, std_flag)}-{exceptions}-{build_type}'
+      build_dir = f'build-{config}'
       os.mkdir(build_dir)
       os.chdir(build_dir)
       result[config] = { 'Configure': None, 'Build': None, 'Test': None }
@@ -28,11 +27,12 @@ for std_flag in std_flags.split() if std_flags is not None else ['']:
         tests.remove('libc++')
 
       result[config]['Configure'] = subprocess.call([
-        'cmake', '-GNinja',
-                 '-DCMAKE_BUILD_TYPE={}'.format(build_type),
-                 '-DMPARK_VARIANT_EXCEPTIONS={}'.format(exceptions),
-                 '-DMPARK_VARIANT_INCLUDE_TESTS={}'.format(';'.join(tests)),
-                 '..',
+          'cmake',
+          '-GNinja',
+          f'-DCMAKE_BUILD_TYPE={build_type}',
+          f'-DMPARK_VARIANT_EXCEPTIONS={exceptions}',
+          f"-DMPARK_VARIANT_INCLUDE_TESTS={';'.join(tests)}",
+          '..',
       ])
       if result[config]['Configure'] == 0:
         result[config]['Build'] = subprocess.call([
